@@ -2,16 +2,17 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js'
 import { getFirestore, setDoc, doc, getDoc  } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
 import { removeByClass } from "./utilities.js"
+import { readTable, writeTable } from './db_impl.js'
 
-initializeApp({
-    apiKey: "AIzaSyBHeMAEuyyfXrVQYShlgrg4BrenCJfiG8s",
-    authDomain: "ticketevents-ce96f.firebaseapp.com",
-    projectId: "ticketevents-ce96f",
-    storageBucket: "ticketevents-ce96f.appspot.com",
-    messagingSenderId: "543716838496",
-    appId: "1:543716838496:web:3ce5f41ca870b53c08c705",
-    measurementId: "G-MEVQV0H403"
-});
+// initializeApp({
+//     apiKey: "AIzaSyBHeMAEuyyfXrVQYShlgrg4BrenCJfiG8s",
+//     authDomain: "ticketevents-ce96f.firebaseapp.com",
+//     projectId: "ticketevents-ce96f",
+//     storageBucket: "ticketevents-ce96f.appspot.com",
+//     messagingSenderId: "543716838496",
+//     appId: "1:543716838496:web:3ce5f41ca870b53c08c705",
+//     measurementId: "G-MEVQV0H403"
+// });
 
 const auth = getAuth();
 const db = getFirestore();
@@ -22,26 +23,22 @@ window.onload = function (){
 
 function register(email, password){
   createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed in 
+  .then( async (userCredential) => {
     const user = userCredential.user;
 
     //Scrive in un database maggiori informazioni riguardo
     //l'utente che si è appena registrato
     //Solo gli spettatori possono registrarsi. 
     //Admin può promuovere uno spettatore a organizzatore evetualmente
-    try {
-      setDoc((doc(db, "users",userCredential.user.uid)), {
-        uid: userCredential.user.uid,
-        ruolo: "SPETTATORE",
-        portafoglio: 0,
-        eventiPreferiti: "",
-        abbonamento: ""
-      });
-      console.log("Document written with ID: ", doc(db, "users",userCredential.user.uid).id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
+    await writeTable("users", userCredential.user.uid, {
+      uid: userCredential.user.uid,
+      ruolo: "SPETTATORE",
+      portafoglio: 0,
+      eventiPreferiti: "",
+      abbonamento: ""
+    });
+
+  
     // Chiama il login con email e password;
   })
   .catch((error) => {
@@ -54,9 +51,12 @@ function register(email, password){
 
 function login(email, password){
   signInWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
+  .then( async (userCredential) => {
     // Signed in 
     const user = userCredential.user;
+
+    response = await readTable("users", uid);
+      
 
     location.href = '../index.html';
     // ...
@@ -83,17 +83,12 @@ function loggedIn(){
     if (user) {
       const uid = user.uid;
 
-      const docRef = doc(db, "users",uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        //Puoi accedere a ogni singolo dato con docSnap.data().<nome_dato>
-        console.log("Document data:", docSnap.data());
-      } else {
-        console.log("No such document!");
-      }
       
-      console.log("logged as uid: " + uid);
+      await readTable("users", uid).then( (response) => {
+        console.log(response.ruolo);
+      });
+      
+      
       removeByClass("userNotLogged");
 
     } else {
