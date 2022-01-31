@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js'
-import { getFirestore, setDoc, doc, getDoc  } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
+import { getFirestore, setDoc, addDoc, doc, getDoc, collection, query, getDocs, where } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
 
 
 initializeApp({
@@ -21,13 +21,27 @@ export async function readTable(table, id) {
     console.log("Document data:", docSnap.data());
     return docSnap.data();
   }
-
   return null;
 }
 
-export async function writeTable(table, id, data) {
-  console.log("kappa");
+//Restituisce tutti gli eventi prenotabili
+export async function getBookableEvents(){
+  const q = query(collection(db, "events"), where("prenotabile", "==", true));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
+} 
+
+export async function getUserTickets(){
+  const UID = localStorage.getItem("UID");
+  const q = query(collection(db, "reservations"), where("uid", "==", UID));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
+} 
+
+export async function writeTableWithID(table, id, data) {
   await setDoc(doc(db, table, id), data);
-  console.log("Document written with ID: ", doc(db, table, id, data));
-  
+}
+
+export async function writeTable(table, data) {
+  await addDoc(collection(db, table), data);
 }
