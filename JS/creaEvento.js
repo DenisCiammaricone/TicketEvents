@@ -1,5 +1,5 @@
 import { getUID } from "./auth.js";
-import { writeTable, writeTableWithID } from "./db_impl.js"
+import { writeTable } from "./db_impl.js"
 
 
 document.getElementById('creaEvento').onclick = function creaEvento(){
@@ -7,9 +7,11 @@ document.getElementById('creaEvento').onclick = function creaEvento(){
     const nome = document.getElementById("nome").value;
     const descrizione = document.getElementById("descrizione").value;
     const luogo = document.getElementById("luogo").value;
+    const prezzo = document.getElementById("prezzo").value;
 
     writeTable("events", {
         creatore: getUID(),
+        prezzo: prezzo,
         tipo: tipo,
         nome: nome,
         descrizione: descrizione,

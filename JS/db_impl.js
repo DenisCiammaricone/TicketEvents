@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js'
-import { getFirestore, setDoc, addDoc, doc, getDoc, collection, query, getDocs, where } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
+import { getFirestore, setDoc, addDoc, doc, getDoc, collection, query, getDocs, where, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
 
 
 initializeApp({
@@ -18,7 +18,6 @@ const db = getFirestore();
 export async function readTable(table, id) {
   const docSnap = await getDoc(doc(db, table,id));
   if(docSnap.exists()){
-    console.log("Document data:", docSnap.data());
     return docSnap.data();
   }
   return null;
@@ -31,9 +30,20 @@ export async function getBookableEvents(){
   return querySnapshot;
 } 
 
+export async function getEvent(eid){
+  return readTable("events", eid);
+} 
+
 export async function getUserTickets(){
   const UID = localStorage.getItem("UID");
   const q = query(collection(db, "reservations"), where("uid", "==", UID));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
+} 
+
+export async function getUserShoppingCart(){
+  const UID = localStorage.getItem("UID");
+  const q = query(collection(db, "carts"), where("uid", "==", UID), where("prenotato", "==", false));
   const querySnapshot = await getDocs(q);
   return querySnapshot;
 } 
@@ -44,4 +54,32 @@ export async function writeTableWithID(table, id, data) {
 
 export async function writeTable(table, data) {
   await addDoc(collection(db, table), data);
+}
+
+export function addToCart(idEvento, prezzoEvento){
+  const UID = localStorage.getItem("UID");
+
+  writeTable("carts", {
+      uid: UID,
+      eid: idEvento,
+      prezzo: prezzoEvento,
+      prenotato: false
+  });
+}
+
+export function setCartAsOrdered(events) {
+  events.forEach(element => {
+    updateDoc(doc(db, "carts", element.id), {
+      prenotato: true
+    });
+  });
+}
+
+export function bookEvent(event) {
+  const UID = localStorage.getItem("UID");
+  writeTable("reservations", {
+      uid: UID,
+      eid: event.data().eid,
+      pagato: false
+  });
 }
