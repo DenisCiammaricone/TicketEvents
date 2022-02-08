@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js'
-import { getFirestore, setDoc, addDoc, doc, getDoc, collection, query, getDocs, where, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
+import { getFirestore, setDoc, addDoc, doc, getDoc, collection, query, getDocs, where, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js'
 
 
 initializeApp({
@@ -48,6 +48,40 @@ export async function getUserShoppingCart(){
   return querySnapshot;
 } 
 
+export async function getUserRefundableReservations(){
+  const UID = localStorage.getItem("UID");
+  const q = query(collection(db, "reservations"), where("refund_asked", "==", false), where("uid", "==", UID), where("pagato", "==", true));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
+}
+
+export async function getReservationToRefun(){
+  const q = query(collection(db, "refund"), where("effettuato", "==", false));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
+}
+
+export async function giveRefund(refundID){
+  const refund = await readTable("refund", refundID);
+  const reservationID = refund.reservation_id;
+  const reservation = await readTable("reservations", reservationID);
+  const UID = reservation.uid;
+  const ticketValue = await readTable("events",reservation.eid).prezzo;
+
+   updateDoc(doc(db, "users", UID), {
+     portafoglio: increment(ticketValue)
+   });
+   updateDoc(doc(db, "refund", refundID), {
+     effettuato: true
+   });
+}
+
+export function setRefundAsAsked(reservationID){
+  updateDoc(doc(db, "reservations", reservationID), {
+    refund_asked: true
+  });
+}
+
 export async function writeTableWithID(table, id, data) {
   await setDoc(doc(db, table, id), data);
 }
@@ -80,6 +114,7 @@ export function bookEvent(event) {
   writeTable("reservations", {
       uid: UID,
       eid: event.data().eid,
-      pagato: false
+      pagato: false,
+      refund_asked:false
   });
 }
