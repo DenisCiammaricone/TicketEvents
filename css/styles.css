@@ -1,0 +1,13 @@
+body{
+    background-image: url('../immagini/sfondo.jfif');
+}
+
+
+h1 {
+    color:red;
+    font-size: 24px;
+}
+h2 {
+    font-size: 12px;
+    
+}
