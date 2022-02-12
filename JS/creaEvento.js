@@ -1,6 +1,4 @@
-import { getUID } from "./auth.js";
 import { writeTable } from "./db_impl.js"
-
 
 document.getElementById('creaEvento').onclick = function creaEvento(){
     const tipo = document.getElementById("tipoEvento").value;
@@ -8,13 +6,18 @@ document.getElementById('creaEvento').onclick = function creaEvento(){
     const descrizione = document.getElementById("descrizione").value;
     const luogo = document.getElementById("luogo").value;
     const prezzo = document.getElementById("prezzo").value;
+    const dataEvento = document.getElementById("dataEvento").value;
+    const uid = localStorage.getItem("UID");
+    console.log(dataEvento);
 
     writeTable("events", {
-        creatore: getUID(),
+        creatore: uid,
         prezzo: prezzo,
         tipo: tipo,
         nome: nome,
         descrizione: descrizione,
-        luogo: luogo
+        prenotabile: true,
+        luogo: luogo,
+        data: dataEvento
     });
 }

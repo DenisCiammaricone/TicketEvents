@@ -5,9 +5,9 @@ getUserShoppingCart().then((events) => {
     let prezzo = 0
     //Gestisci qui l'impaginazione del documento contentente tutti gli eventi
     events.forEach(doc => {
+        console.log(doc.data());
         getEvent(doc.data().eid).then((e) => {
             let a = document.createElement("p");
-
             let txt = document.createTextNode(e.nome + " " + e.descrizione + 
             " " + e.luogo + " " + e.tipo + " " + doc.data().prezzo + " ");
     

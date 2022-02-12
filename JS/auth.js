@@ -1,6 +1,6 @@
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut} from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-auth.js'
 import { removeByClass } from "./utilities.js"
-import { readTable, writeTableWithID } from './db_impl.js'
+import { writeTableWithID } from './db_impl.js'
 
 const auth = getAuth();
 let UID = "";
@@ -67,8 +67,6 @@ function loggedIn(){
     if (user) {
       UID = user.uid;
       localStorage.setItem("UID", user.uid);
-      // await readTable("users", UID).then( (response) => {
-      // });
       
       removeByClass("userNotLogged");
     } else {

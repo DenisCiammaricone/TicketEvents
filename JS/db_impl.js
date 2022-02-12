@@ -66,14 +66,14 @@ export async function giveRefund(refundID){
   const reservationID = refund.reservation_id;
   const reservation = await readTable("reservations", reservationID);
   const UID = reservation.uid;
-  const ticketValue = await readTable("events",reservation.eid).prezzo;
-
-   updateDoc(doc(db, "users", UID), {
-     portafoglio: increment(ticketValue)
-   });
-   updateDoc(doc(db, "refund", refundID), {
-     effettuato: true
-   });
+  const ticketValue = await readTable("events",reservation.eid);
+  console.log(ticketValue.prezzo);
+  updateDoc(doc(db, "users", UID), {
+    portafoglio: increment(ticketValue.prezzo)
+  });
+  updateDoc(doc(db, "refund", refundID), {
+    effettuato: true
+  });
 }
 
 export function setRefundAsAsked(reservationID){
